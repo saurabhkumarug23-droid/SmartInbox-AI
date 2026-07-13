@@ -19,12 +19,13 @@ const transitionDebug = {
 };
 const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
     const [accountId] = useLocalStorage('accountId', '')
-    const { input, handleInputChange, handleSubmit, messages } = useChat({
+    const { input, handleInputChange, handleSubmit, messages, setInput } = useChat({
         api: "/api/chat",
         body: {
             accountId,
         },
         onError: (error) => {
+            toast.error(error.message);
             if (error.message.includes('Limit reached')) {
                 toast.error('You have reached the limit for today. Please upgrade to pro to ask as many questions as you want')
             }
@@ -81,21 +82,9 @@ const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
                         </div>
                         <div className="h-2"></div>
                         <div className="flex items-center gap-2 flex-wrap">
-                            <span onClick={() => handleInputChange({
-                                target: {
-                                    value: 'What can I ask?'
-                                }
-                            })} className='px-2 py-1 bg-gray-800 text-gray-200 rounded-md text-xs'>What can I ask?</span>
-                            <span onClick={() => handleInputChange({
-                                target: {
-                                    value: 'When is my next flight?'
-                                }
-                            })} className='px-2 py-1 bg-gray-800 text-gray-200 rounded-md text-xs'>When is my next flight?</span>
-                            <span onClick={() => handleInputChange({
-                                target: {
-                                    value: 'When is my next meeting?'
-                                }
-                            })} className='px-2 py-1 bg-gray-800 text-gray-200 rounded-md text-xs'>When is my next meeting?</span>
+                            <span onClick={() => { setInput('What can I ask?'); }} className='px-2 py-1 bg-gray-800 text-gray-200 rounded-md text-xs cursor-pointer hover:bg-gray-700 transition-colors'>What can I ask?</span>
+                            <span onClick={() => { setInput('When is my next flight?'); }} className='px-2 py-1 bg-gray-800 text-gray-200 rounded-md text-xs cursor-pointer hover:bg-gray-700 transition-colors'>When is my next flight?</span>
+                            <span onClick={() => { setInput('When is my next meeting?'); }} className='px-2 py-1 bg-gray-800 text-gray-200 rounded-md text-xs cursor-pointer hover:bg-gray-700 transition-colors'>When is my next meeting?</span>
                         </div>
                     </div>
                     }
