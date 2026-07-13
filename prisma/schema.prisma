@@ -67,12 +67,12 @@ model Account {
 
     binaryIndex Json?
 
-    token        String @unique
-    provider     String
+    accessToken  String   @unique
+    refreshToken String?
+    expiryDate   DateTime
+    provider     String   @default("Google")
     emailAddress String
     name         String
-
-    nextDeltaToken String?
 
     user           User           @relation(fields: [userId], references: [id])
     threads        Thread[]

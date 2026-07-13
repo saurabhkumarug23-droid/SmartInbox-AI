@@ -1,9 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import Account from "@/lib/account";
-import { syncEmailsToDatabase } from "@/lib/sync-to-db";
 import { db } from "@/server/db";
-import { getEmailDetails } from "@/lib/aurinko";
+import { getEmailDetails } from "@/lib/google-auth";
 import type { Prisma } from "@prisma/client";
 import { emailAddressSchema } from "@/lib/types";
 import { FREE_CREDITS_PER_DAY } from "@/app/constants";
@@ -15,7 +14,7 @@ export const authoriseAccountAccess = async (accountId: string, userId: string) 
             userId: userId,
         },
         select: {
-            id: true, emailAddress: true, name: true, token: true
+            id: true, emailAddress: true, name: true, accessToken: true
         }
     })
     if (!account) throw new Error("Invalid token")
@@ -203,7 +202,7 @@ export const mailRouter = createTRPCRouter({
     })).mutation(async ({ ctx, input }) => {
         const account = await authoriseAccountAccess(input.accountId, ctx.auth.userId)
         if (!account) throw new Error("Invalid token")
-        const acc = new Account(account.token)
+        const acc = new Account(account.accessToken)
         acc.syncEmails()
     }),
     setUndone: protectedProcedure.input(z.object({
@@ -272,7 +271,7 @@ export const mailRouter = createTRPCRouter({
         accountId: z.string()
     })).query(async ({ ctx, input }) => {
         const account = await authoriseAccountAccess(input.accountId, ctx.auth.userId)
-        return await getEmailDetails(account.token, input.emailId)
+        return await getEmailDetails(account.accessToken, input.emailId)
     }),
     sendEmail: protectedProcedure.input(z.object({
         accountId: z.string(),
@@ -287,7 +286,7 @@ export const mailRouter = createTRPCRouter({
         threadId: z.string().optional(),
     })).mutation(async ({ ctx, input }) => {
         const acc = await authoriseAccountAccess(input.accountId, ctx.auth.userId)
-        const account = new Account(acc.token)
+        const account = new Account(acc.accessToken)
         console.log('sendmail', input)
         await account.sendEmail({
             body: input.body,

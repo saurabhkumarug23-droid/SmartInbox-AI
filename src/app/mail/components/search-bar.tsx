@@ -32,7 +32,7 @@ const SearchBar = () => {
         }
         window.addEventListener('keydown', handleEscape)
         return () => window.removeEventListener('keydown', handleEscape)
-    }, [setIsSearching, searchValue, isSearching, document.activeElement])
+    }, [setIsSearching, searchValue, isSearching])
 
 
     return (

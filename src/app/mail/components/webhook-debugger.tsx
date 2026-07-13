@@ -20,7 +20,7 @@ const WebhookDebugger = () => {
     const [accountId, setAccountId] = useLocalStorage('accountId', '')
     const { data, isLoading, refetch } = api.webhooks.getWebhooks.useQuery({
         accountId
-    })
+    }, { enabled: !!accountId })
 
     const createWebhook = api.webhooks.createWebhook.useMutation()
     const deleteWebhook = api.webhooks.deleteWebhook.useMutation()
