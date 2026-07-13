@@ -10,7 +10,7 @@ import { ThemeProvider } from "@/components/theme-provicer";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "Normal Human",
+  title: "SmartInbox AI",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -19,7 +19,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${GeistSans.variable}`}>
-        <body>
+        <body suppressHydrationWarning>
         <ClerkProvider>
           <ThemeProvider attribute='class' defaultTheme='system' enableSystem disableTransitionOnChange>
             <TRPCReactProvider>
