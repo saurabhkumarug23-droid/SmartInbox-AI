@@ -1,6 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { createRazorpaySubscription } from "@/lib/razorpay-actions";
+import { createRazorpayOrder } from "@/lib/razorpay-actions";
 
 export async function POST() {
     try {
@@ -9,13 +9,12 @@ export async function POST() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { subscriptionId, keyId } = await createRazorpaySubscription();
-
-        return NextResponse.json({ subscriptionId, keyId });
+        const order = await createRazorpayOrder();
+        return NextResponse.json(order);
     } catch (error: any) {
-        console.error("Error creating Razorpay subscription:", error);
+        console.error("Error creating Razorpay order:", error);
         return NextResponse.json(
-            { error: error?.message || "Failed to create subscription" },
+            { error: error?.message || "Failed to create order" },
             { status: 500 }
         );
     }

@@ -29,28 +29,38 @@ const RazorpayButton = () => {
         script.async = true
         document.body.appendChild(script)
         return () => {
-            document.body.removeChild(script)
+            if (document.body.contains(script)) {
+                document.body.removeChild(script)
+            }
         }
     }, [])
 
     const handleUpgrade = async () => {
         setIsLoading(true)
         try {
-            // Create subscription on server
+            // Create order on server
             const res = await fetch('/api/razorpay/create-subscription', { method: 'POST' })
-            if (!res.ok) throw new Error('Failed to create subscription')
-            const { subscriptionId, keyId } = await res.json() as { subscriptionId: string; keyId: string }
+            if (!res.ok) throw new Error('Failed to create order')
 
-            // Open Razorpay popup
+            const { orderId, amount, currency, keyId } = await res.json() as {
+                orderId: string
+                amount: number
+                currency: string
+                keyId: string
+            }
+
+            // Open Razorpay checkout popup
             const rzp = new window.Razorpay({
                 key: keyId,
-                subscription_id: subscriptionId,
+                amount,
+                currency,
+                order_id: orderId,
                 name: 'SmartInbox AI',
-                description: 'Pro Subscription',
+                description: 'Pro Plan – 1 Year Access',
                 theme: { color: '#6366f1' },
                 handler: async (response: {
                     razorpay_payment_id: string
-                    razorpay_subscription_id: string
+                    razorpay_order_id: string
                     razorpay_signature: string
                 }) => {
                     // Verify payment on server
@@ -60,11 +70,12 @@ const RazorpayButton = () => {
                         body: JSON.stringify(response),
                     })
                     if (verify.ok) {
-                        toast.success('Subscription activated! Welcome to Pro 🎉')
+                        toast.success('Payment successful! Welcome to Pro 🎉')
                         setIsSubscribed(true)
                     } else {
-                        toast.error('Payment verification failed. Please contact support.')
+                        toast.error('Payment verification failed. Contact support.')
                     }
+                    setIsLoading(false)
                 },
                 modal: {
                     ondismiss: () => setIsLoading(false),
@@ -81,10 +92,10 @@ const RazorpayButton = () => {
         setIsLoading(true)
         try {
             await cancelSubscription()
-            toast.success('Subscription cancelled. Access continues until the end of billing period.')
+            toast.success('Pro access removed.')
             setIsSubscribed(false)
         } catch (error: any) {
-            toast.error(error?.message || 'Failed to cancel subscription')
+            toast.error(error?.message || 'Failed to cancel')
         } finally {
             setIsLoading(false)
         }
@@ -100,7 +111,7 @@ const RazorpayButton = () => {
             {isLoading
                 ? 'Processing…'
                 : isSubscribed
-                    ? 'Cancel Subscription'
+                    ? 'Manage Subscription'
                     : 'Upgrade Plan'}
         </Button>
     )

@@ -1,7 +1,7 @@
 'use client'
 import { motion } from 'framer-motion'
 import React from 'react'
-import StripeButton from './stripe-button'
+import RazorpayButton from './razorpay-button'
 import { api } from '@/trpc/react'
 import { FREE_CREDITS_PER_DAY } from '@/app/constants'
 import { getSubscriptionStatus } from '@/lib/razorpay-actions'
@@ -26,7 +26,7 @@ const PremiumBanner = () => {
                 <div className="h-2"></div>
                 <p className='text-gray-400 text-sm md:max-w-[calc(100%-70px)]'>Ask as many questions as you want</p>
                 <div className="h-4"></div>
-                <StripeButton />
+                <RazorpayButton />
             </div>
         </motion.div>
     )
@@ -42,7 +42,7 @@ const PremiumBanner = () => {
                 <div className="h-4"></div>
                 <p className='text-gray-400 text-sm md:max-w-[calc(100%-150px)]'>Upgrade to pro to ask as many questions as you want</p>
                 <div className="h-4"></div>
-                <StripeButton />
+                <RazorpayButton />
             </div>
         </motion.div>
     )
