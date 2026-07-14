@@ -17,8 +17,9 @@ import EmailEditor from "./email-editor"
 import { api } from "@/trpc/react"
 import { useLocalStorage } from "usehooks-ts"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
-const ComposeButton = () => {
+const ComposeButton = ({ isCollapsed }: { isCollapsed?: boolean }) => {
     const [open, setOpen] = React.useState(false)
     const [accountId] = useLocalStorage('accountId', '')
     const [toValues, setToValues] = React.useState<{ label: string; value: string; }[]>([])
@@ -74,9 +75,9 @@ const ComposeButton = () => {
     return (
         <Drawer open={open} onOpenChange={setOpen}>
             <DrawerTrigger asChild>
-                <Button>
-                    <Pencil className='size-4 mr-1' />
-                    Compose
+                <Button size={isCollapsed ? "icon" : "default"}>
+                    <Pencil className={cn('size-4', isCollapsed ? '' : 'mr-1')} />
+                    {!isCollapsed && "Compose"}
                 </Button>
             </DrawerTrigger>
             <DrawerContent className="">

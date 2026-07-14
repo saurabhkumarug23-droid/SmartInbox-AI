@@ -1,4 +1,5 @@
 import type { EmailMessage, SyncResponse, SyncUpdatedResponse } from '@/lib/types';
+import pLimit from 'p-limit';
 import { db } from '@/server/db';
 import { syncEmailsToDatabase } from './sync-to-db';
 import {
@@ -25,22 +26,26 @@ class Account {
     }
 
     private async fetchMessagesByIds(gmail: Awaited<ReturnType<typeof getAuthenticatedGmailClient>>['gmail'], messageIds: string[]): Promise<EmailMessage[]> {
-        const records: EmailMessage[] = []
-
-        for (const messageId of messageIds) {
-            try {
-                const { data } = await gmail.users.messages.get({
-                    userId: 'me',
-                    id: messageId,
-                    format: 'full',
-                })
-                records.push(mapGmailMessageToEmailMessage(data))
-            } catch (error) {
-                console.error(`Failed to fetch Gmail message ${messageId}:`, error)
-            }
-        }
-
-        return records
+        const limit = pLimit(10);
+        
+        const fetchPromises = messageIds.map(messageId => 
+            limit(async () => {
+                try {
+                    const { data } = await gmail.users.messages.get({
+                        userId: 'me',
+                        id: messageId,
+                        format: 'full',
+                    })
+                    return mapGmailMessageToEmailMessage(data)
+                } catch (error) {
+                    console.error(`Failed to fetch Gmail message ${messageId}:`, error)
+                    return null;
+                }
+            })
+        );
+        
+        const results = await Promise.all(fetchPromises);
+        return results.filter((msg): msg is EmailMessage => msg !== null);
     }
 
     private async getCurrentHistoryId(gmail: Awaited<ReturnType<typeof getAuthenticatedGmailClient>>['gmail']) {
@@ -168,17 +173,12 @@ class Account {
             const syncResponse = await this.startSync(daysWithin)
 
             let storedDeltaToken: string = syncResponse.syncUpdatedToken
-            let updatedResponse = await this.getUpdatedEmails({ deltaToken: syncResponse.syncUpdatedToken })
-
-            if (updatedResponse.nextDeltaToken) {
-                storedDeltaToken = updatedResponse.nextDeltaToken
-            }
-
+            // Fetch the initial batch of emails (last 3 days) without a delta token
+            let updatedResponse = await this.getUpdatedEmails({})
             let allEmails: EmailMessage[] = updatedResponse.records
 
             while (updatedResponse.nextPageToken) {
                 updatedResponse = await this.getUpdatedEmails({
-                    deltaToken: syncResponse.syncUpdatedToken,
                     pageToken: updatedResponse.nextPageToken,
                 })
                 allEmails = allEmails.concat(updatedResponse.records)

@@ -51,7 +51,7 @@ const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
             <div className="h-4"></div>
             <motion.div className="flex flex-1 flex-col items-end justify-end pb-4 border p-4 rounded-lg bg-gray-100 shadow-inner dark:bg-gray-900">
                 <div className="max-h-[50vh] overflow-y-scroll w-full flex flex-col gap-2" id='message-container'>
-                    <AnimatePresence mode="wait">
+                    <AnimatePresence>
                         {messages.map((message) => (
                             <motion.div
                                 key={message.id}
@@ -98,20 +98,6 @@ const AskAI = ({ isCollapsed }: { isCollapsed: boolean }) => {
             "
                             placeholder="Ask AI anything about your emails"
                         />
-                        <motion.div
-                            key={messages.length}
-                            layout="position"
-                            className="pointer-events-none absolute z-10 flex h-9 w-[250px] items-center overflow-hidden break-words rounded-full bg-gray-200 [word-break:break-word] dark:bg-gray-800"
-                            layoutId={`container-[${messages.length}]`}
-                            transition={transitionDebug}
-                            initial={{ opacity: 0.6, zIndex: -1 }}
-                            animate={{ opacity: 0.6, zIndex: -1 }}
-                            exit={{ opacity: 1, zIndex: 1 }}
-                        >
-                            <div className="px-3 py-2 text-[15px] leading-[15px] text-gray-900 dark:text-gray-100">
-                                {input}
-                            </div>
-                        </motion.div>
                         <button
                             type="submit"
                             className="ml-2 flex h-9 w-9 items-center justify-center rounded-full bg-gray-200

@@ -10,7 +10,7 @@ export async function generate(input: string) {
     console.log("input", input);
     (async () => {
         const { textStream } = await streamText({
-            model: openai('gpt-4o-mini'),
+            model: openai('gpt-4o-mini') as any,
             prompt: `
             You are a helpful AI embedded in a email client app that is used to answer questions about the emails in the inbox.
             ${input}

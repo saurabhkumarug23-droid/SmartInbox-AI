@@ -15,7 +15,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@ai-sdk/openai": "^4.0.10",
+    "@ai-sdk/openai": "^0.0.14",
     "@clerk/nextjs": "^7.5.16",
     "@formkit/auto-animate": "^0.8.2",
     "@heroicons/react": "^2.1.5",

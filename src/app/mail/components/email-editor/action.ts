@@ -5,13 +5,62 @@ import { streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { createStreamableValue } from 'ai/rsc';
 
+export type EmailReasoning = {
+    confidence: number;
+    contextEmailCount: number;
+    hasUserName: boolean;
+    detectedIntent: string | null;
+    chips: { emoji: string; label: string }[];
+}
+
+function computeReasoning(context: string, prompt: string): EmailReasoning {
+    // Count how many emails are in context by counting "Subject:" headers
+    const contextEmailCount = (context.match(/Subject:/g) ?? []).length;
+    const hasUserName = context.includes('My name is:') && !context.includes('My name is: undefined');
+
+    // Detect intent keywords in the prompt
+    const intentMap: Record<string, string> = {
+        'follow.?up|following up': 'Follow-up detected',
+        'apolog|sorry': 'Apology tone detected',
+        'deadline|urgent|asap': 'Urgency detected',
+        'thank|thanks|grateful': 'Thank-you tone detected',
+        'schedule|meeting|call': 'Meeting request detected',
+        'introduc': 'Introduction detected',
+    };
+    let detectedIntent: string | null = null;
+    for (const [pattern, label] of Object.entries(intentMap)) {
+        if (new RegExp(pattern, 'i').test(prompt)) {
+            detectedIntent = label;
+            break;
+        }
+    }
+
+    // Compute confidence: base 40, +20 per email (cap 3), +10 for username, +10 for intent
+    const confidence = Math.min(
+        40 + Math.min(contextEmailCount, 3) * 20 + (hasUserName ? 10 : 0) + (detectedIntent ? 10 : 0),
+        100
+    );
+
+    const chips: { emoji: string; label: string }[] = [];
+    if (contextEmailCount > 0) {
+        chips.push({ emoji: '📧', label: `Used ${contextEmailCount} previous email${contextEmailCount > 1 ? 's' : ''}` });
+    } else {
+        chips.push({ emoji: '⚠️', label: 'Low context — drafted from scratch' });
+    }
+    if (hasUserName) chips.push({ emoji: '👤', label: 'Matched your name' });
+    if (detectedIntent) chips.push({ emoji: '🎯', label: detectedIntent });
+
+    return { confidence, contextEmailCount, hasUserName, detectedIntent, chips };
+}
+
 export async function generateEmail(context: string, prompt: string) {
     console.log("context", context)
     const stream = createStreamableValue('');
+    const reasoning = computeReasoning(context, prompt);
 
     (async () => {
         const { textStream } = await streamText({
-            model: openai('gpt-4-turbo'),
+            model: openai('gpt-4o') as any,
             prompt: `
             You are an AI email assistant embedded in an email client app. Your purpose is to help the user compose emails by providing suggestions and relevant information based on the context of their previous emails.
             
@@ -44,8 +93,9 @@ export async function generateEmail(context: string, prompt: string) {
         stream.done();
     })();
 
-    return { output: stream.value };
+    return { output: stream.value, reasoning };
 }
+
 
 export async function generate(input: string) {
     const stream = createStreamableValue('');
@@ -53,7 +103,7 @@ export async function generate(input: string) {
     console.log("input", input);
     (async () => {
         const { textStream } = await streamText({
-            model: openai('gpt-4'),
+            model: openai('gpt-4o') as any,
             prompt: `
             ALWAYS RESPOND IN PLAIN TEXT, no html or markdown.
             You are a helpful AI embedded in a email client app that is used to autocomplete sentences, similar to google gmail autocomplete

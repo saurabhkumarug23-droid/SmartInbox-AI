@@ -18,10 +18,10 @@ const LandingPage = async () => {
             {/* Sticky Navigation */}
             <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-background/60 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
                 <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                    <a href="#" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); }} className="flex items-center gap-2 cursor-pointer">
+                    <Link href="/" className="flex items-center gap-2 cursor-pointer">
                         <Mail className="size-6 text-blue-500" />
                         <span className="font-bold text-xl tracking-tight">SmartInbox AI</span>
-                    </a>
+                    </Link>
                     <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
                         <Link href="#features" className="hover:text-foreground transition-colors">Features</Link>
                         <Link href="#pricing" className="hover:text-foreground transition-colors">Pricing</Link>

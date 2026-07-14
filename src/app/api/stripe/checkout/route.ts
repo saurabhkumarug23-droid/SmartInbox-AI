@@ -59,7 +59,8 @@ export async function GET(request: NextRequest) {
                 productId: productId,
                 priceId: plan.id,
                 customerId: customerId,
-                userId
+                userId,
+                currentPeriodEnd: new Date(subscription.current_period_end * 1000)
             }
         })
 

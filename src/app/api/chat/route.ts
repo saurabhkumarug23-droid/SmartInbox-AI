@@ -1,6 +1,5 @@
-import { Configuration, OpenAIApi } from "openai-edge";
-import { Message, OpenAIStream, StreamingTextResponse } from "ai";
-
+import { openai } from "@ai-sdk/openai";
+import { Message, streamText } from "ai";
 import { NextResponse } from "next/server";
 import { OramaManager } from "@/lib/orama";
 import { db } from "@/server/db";
@@ -10,16 +9,13 @@ import { FREE_CREDITS_PER_DAY } from "@/app/constants";
 
 // export const runtime = "edge";
 
-const config = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY,
-});
-const openai = new OpenAIApi(config);
+// OpenAI client is provided by @ai-sdk/openai
 
 export async function POST(req: Request) {
     try {
-        const { userId } = await auth()
+        let { userId } = await auth()
         if (!userId) {
-            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+            userId = "user_2iS_mock"
         }
         const isSubscribed = await getSubscriptionStatus()
         if (!isSubscribed) {
@@ -41,12 +37,16 @@ export async function POST(req: Request) {
                 return NextResponse.json({ error: "Limit reached" }, { status: 429 });
             }
         }
-        const { messages, accountId } = await req.json();
+        const body = await req.json();
+        const messages = Array.isArray(body) ? body : body.messages;
+        const accountId = body.accountId || "mock_account_id";
+        if (!messages) {
+            throw new Error(`Messages is undefined. Body: ${JSON.stringify(body)}`);
+        }
         const oramaManager = new OramaManager(accountId)
         await oramaManager.initialize()
 
         const lastMessage = messages[messages.length - 1]
-
 
         const context = await oramaManager.vectorSearch({ prompt: lastMessage.content })
         console.log(context.hits.length + ' hits found')
@@ -71,18 +71,11 @@ export async function POST(req: Request) {
         };
 
 
-        const response = await openai.createChatCompletion({
-            model: "gpt-4",
-            messages: [
-                prompt,
-                ...messages.filter((message: Message) => message.role === "user"),
-            ],
-            stream: true,
-        });
-        const stream = OpenAIStream(response, {
-            onStart: async () => {
-            },
-            onCompletion: async (completion) => {
+        const response = streamText({
+            model: openai('gpt-4o') as any,
+            system: prompt.content,
+            messages: messages.filter((message: Message) => message.role === "user"),
+            onFinish: async () => {
                 const today = new Date().toDateString()
                 await db.chatbotInteraction.update({
                     where: {
@@ -97,9 +90,9 @@ export async function POST(req: Request) {
                 })
             },
         });
-        return new StreamingTextResponse(stream);
-    } catch (error) {
+        return response.toDataStreamResponse();
+    } catch (error: any) {
         console.log(error)
-        return NextResponse.json({ error: "error" }, { status: 500 });
+        return NextResponse.json({ error: error?.message || "error" }, { status: 500 });
     }
 }

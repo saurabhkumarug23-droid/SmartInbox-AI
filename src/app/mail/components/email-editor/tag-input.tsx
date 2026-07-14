@@ -35,14 +35,14 @@ const TagInput: React.FC<TagInputProps> = ({ suggestions, defaultValues = [], la
             onInputChange={setInput}
             defaultValue={defaultValues}
             placeholder={''}
-            options={input ? options.concat({
+            options={input ? (options.concat({
                 label: (
                     <span className='flex items-center gap-2'>
                         <Avatar name={input} size='25' textSizeRatio={2} round={true} />
                         {input}
                     </span>
                 ), value: input
-            }) : options}
+            }) as any) : (options as any)}
             classNames={{
                 control: () => {
                     return '!border-none !outline-none !ring-0 !shadow-none focus:border-none focus:outline-none focus:ring-0 focus:shadow-none dark:bg-transparent'
@@ -52,7 +52,24 @@ const TagInput: React.FC<TagInputProps> = ({ suggestions, defaultValues = [], la
                 },
                 multiValueLabel: () => {
                     return 'dark:text-white dark:bg-gray-700 rounded-md'
-                }
+                },
+                menu: () => {
+                    return '!bg-black !border !border-gray-700 !rounded-lg !shadow-xl'
+                },
+                menuList: () => {
+                    return '!bg-black !rounded-lg'
+                },
+                option: ({ isFocused }) => {
+                    return isFocused
+                        ? '!bg-gray-800 !text-white !cursor-pointer'
+                        : '!bg-black !text-gray-200 !cursor-pointer'
+                },
+                input: () => {
+                    return 'dark:!text-white'
+                },
+                singleValue: () => {
+                    return 'dark:!text-white'
+                },
             }}
             classNamePrefix="select"
         />

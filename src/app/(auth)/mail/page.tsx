@@ -13,16 +13,8 @@ import TopAccountSwitcher from "./top-account-switcher"
 export default function Home() {
   // return <AuthoriseButton />
   return <>
-    <div className="absolute bottom-4 left-4">
-      <div className="flex items-center gap-4">
-        <UserButton />
-        <ModeToggle />
-        <ComposeButton />
-        {process.env.NODE_ENV === 'development' && (
-          <WebhookDebugger />
-        )}
-
-      </div>
+    <div className="hidden">
+      {/* Moved to sidebar */}
     </div>
 
     {/* <div className="border-b ">

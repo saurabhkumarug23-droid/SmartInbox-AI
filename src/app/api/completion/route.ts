@@ -12,8 +12,8 @@ export async function POST(req: Request) {
     // extract the prompt from the body
     const { prompt } = await req.json();
 
-    const response = await openai.createChatCompletion({
-        model: "gpt-3.5-turbo",
+    const response = streamText({
+        model: openai("gpt-4o") as any,
         messages: [
             {
                 role: "system",
@@ -32,8 +32,7 @@ export async function POST(req: Request) {
         `,
             },
         ],
-        stream: true,
     });
-    const stream = OpenAIStream(response);
-    return new StreamingTextResponse(stream);
+
+    return response.toDataStreamResponse();
 }

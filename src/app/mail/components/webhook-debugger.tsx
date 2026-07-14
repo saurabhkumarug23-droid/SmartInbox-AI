@@ -16,7 +16,7 @@ import { useLocalStorage } from "usehooks-ts"
 import { Input } from "@/components/ui/input"
 import { toast } from "sonner"
 
-const WebhookDebugger = () => {
+const WebhookDebugger = ({ isCollapsed }: { isCollapsed?: boolean }) => {
     const [accountId, setAccountId] = useLocalStorage('accountId', '')
     const { data, isLoading, refetch } = api.webhooks.getWebhooks.useQuery({
         accountId
@@ -68,15 +68,16 @@ const WebhookDebugger = () => {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button>
-                    <Webhook className="size-4 mr-1" />
-                    Debug Webhooks
+                <Button size={isCollapsed ? "icon" : "default"}>
+                    <Webhook className={isCollapsed ? "size-4" : "size-4 mr-1"} />
+                    {!isCollapsed && "Debug Webhooks"}
                 </Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle>Webhook Debugger</DialogTitle>
-                    <DialogDescription>
+                    <DialogDescription asChild>
+                        <div>
                         {data?.records?.map(record => (
                             <div key={record.id} className="mb-4 p-4 rounded-md bg-slate-100">
                                 <div className="mb-2">
@@ -125,6 +126,7 @@ const WebhookDebugger = () => {
                             >
                                 Create Webhook
                             </Button>
+                        </div>
                         </div>
                     </DialogDescription>
                 </DialogHeader>

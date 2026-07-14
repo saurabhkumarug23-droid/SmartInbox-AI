@@ -47,7 +47,7 @@ export function ThreadList() {
                 id={`thread-${item.id}`}
                 key={item.id}
                 className={cn(
-                  "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all relative",
+                  "flex flex-col items-start gap-2 rounded-lg border p-3 text-left text-sm transition-all relative hover:bg-accent",
                   visualMode &&
                   selectedThreadIds.includes(item.id) &&
                   "bg-blue-200 dark:bg-blue-900"

@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 import { Nav } from './nav'
-
+import DailyBriefing from './daily-briefing'
 import {
     AlertCircle,
     Archive,
@@ -40,6 +40,14 @@ const SideBar = ({ isCollapsed }: Props) => {
         tab: "sent"
     }, { enabled: !!accountId && !!tab, refetchInterval })
 
+    const [isMounted, setIsMounted] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsMounted(true);
+    }, []);
+
+    if (!isMounted) return null;
+
     return (
         <>
             <Nav
@@ -65,6 +73,9 @@ const SideBar = ({ isCollapsed }: Props) => {
                     },
                 ]}
             />
+            <div className="px-2 mt-2">
+                <DailyBriefing isCollapsed={isCollapsed} />
+            </div>
         </>
     )
 }

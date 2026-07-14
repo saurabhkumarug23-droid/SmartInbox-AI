@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from 'next/link'
 
 import { cn } from "@/lib/utils"
 import {
@@ -24,6 +25,10 @@ import SideBar from "./sidebar"
 import SearchBar, { isSearchingAtom } from "./search-bar"
 import { useAtom } from "jotai"
 import AskAI from "./ask-ai"
+import { UserButton } from "@clerk/nextjs"
+import { ModeToggle } from "@/components/theme-toggle"
+import ComposeButton from "./compose-button"
+
 
 interface MailProps {
   defaultLayout: number[] | undefined
@@ -36,9 +41,14 @@ export function Mail({
   defaultCollapsed = false,
   navCollapsedSize,
 }: MailProps) {
+  const [tab] = useLocalStorage('normalhuman-tab', 'inbox')
   const [done, setDone] = useLocalStorage('normalhuman-done', false)
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed)
+  const [isMounted, setIsMounted] = React.useState(false)
 
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   return (
     <TooltipProvider delayDuration={0}>
@@ -74,39 +84,74 @@ export function Mail({
             "min-w-[50px] transition-all duration-300 ease-in-out"
           )}
         >
-          <div className="flex flex-col h-full flex-1">
+          <div className="flex h-full flex-col">
             <div
               className={cn(
-                "flex h-[52px] items-center justify-center",
-                isCollapsed ? "h-[52px]" : "px-2"
+                "flex h-[52px] items-center gap-2",
+                isCollapsed ? "h-[52px] justify-center" : "px-2"
+              )}
+            >
+              <Link href="/" className="flex items-center gap-2 cursor-pointer">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="size-6 text-blue-500"
+                >
+                  <rect width="20" height="16" x="2" y="4" rx="2" />
+                  <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                </svg>
+                {!isCollapsed && <span className="font-bold text-xl">SmartInbox</span>}
+              </Link>
+            </div>
+            <Separator />
+            <div
+              className={cn(
+                "flex h-[52px] items-center justify-between",
+                isCollapsed ? "h-[52px] justify-center" : "px-2"
               )}
             >
               <AccountSwitcher isCollapsed={isCollapsed} />
             </div>
             <Separator />
-            <SideBar isCollapsed={isCollapsed} />
-            <div className="flex-1"></div>
-            <AskAI isCollapsed={isCollapsed} />
+            
+            <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
+              <SideBar isCollapsed={isCollapsed} />
+              <div className="mt-auto"></div>
+              <AskAI isCollapsed={isCollapsed} />
+            </div>
+            <div className="p-4 flex items-center justify-center">
+              <div className="flex items-center gap-2">
+                <ComposeButton isCollapsed={isCollapsed} />
+
+                {!isCollapsed && <ModeToggle />}
+                {!isCollapsed && <UserButton />}
+              </div>
+            </div>
           </div>
 
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>
-          <Tabs defaultValue="inbox" value={done ? 'done' : 'inbox'} onValueChange={tab => {
-            if (tab === 'done') {
+          <Tabs defaultValue="inbox" value={done ? 'done' : 'inbox'} onValueChange={t => {
+            if (t === 'done') {
               setDone(true)
             } else {
               setDone(false)
             }
           }}>
             <div className="flex items-center px-4 py-2">
-              <h1 className="text-xl font-bold">Inbox</h1>
+              <h1 className="text-xl font-bold capitalize">{isMounted ? tab : 'inbox'}</h1>
               <TabsList className="ml-auto">
                 <TabsTrigger
                   value="inbox"
-                  className="text-zinc-600 dark:text-zinc-200"
+                  className="text-zinc-600 dark:text-zinc-200 capitalize"
                 >
-                  Inbox
+                  {isMounted ? tab : 'inbox'}
                 </TabsTrigger>
                 <TabsTrigger
                   value="done"

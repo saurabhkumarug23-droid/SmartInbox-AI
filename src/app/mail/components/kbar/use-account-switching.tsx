@@ -2,9 +2,13 @@ import { api } from '@/trpc/react'
 import { useRegisterActions } from 'kbar'
 import React from 'react'
 import { useLocalStorage } from 'usehooks-ts'
+import { useAuth } from '@clerk/nextjs'
 
 const useAccountSwitching = () => {
-    const { data: accounts } = api.mail.getAccounts.useQuery()
+    const { isLoaded, userId } = useAuth()
+    const { data: accounts } = api.mail.getAccounts.useQuery(undefined, {
+        enabled: isLoaded && !!userId
+    })
 
     // Create some fake data for demonstration purposes
     const mainAction = [{

@@ -6,7 +6,7 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
 import superjson from "superjson";
 import { ZodError } from "zod";
 
@@ -101,9 +101,9 @@ const timingMiddleware = t.middleware(async ({ next, path }) => {
 
 const isAuth = t.middleware(({ next, ctx }) => {
   if (!ctx.auth?.userId) {
-    throw new Error("Unauthorized");
+    throw new TRPCError({ code: "UNAUTHORIZED" });
   }
-  return next({ ctx: { ...ctx, auth: ctx.auth! as Required<typeof ctx.auth> } });
+  return next({ ctx: { ...ctx, auth: ctx.auth as NonNullable<typeof ctx.auth> } });
 });
 
 /**

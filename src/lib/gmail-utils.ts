@@ -124,9 +124,10 @@ function mapGmailLabelsToSysLabels(labelIds: string[] | null | undefined): Email
     return [...sysLabels]
 }
 
-function extractBodyFromPart(part: gmail_v1.Schema$MessagePart): { body?: string; attachments: EmailAttachment[] } {
+function extractBodyFromPart(part: gmail_v1.Schema$MessagePart): { html?: string; text?: string; attachments: EmailAttachment[] } {
     const attachments: EmailAttachment[] = []
-    let body: string | undefined
+    let html: string | undefined
+    let text: string | undefined
 
     if (part.filename && part.body?.attachmentId) {
         attachments.push({
@@ -144,20 +145,19 @@ function extractBodyFromPart(part: gmail_v1.Schema$MessagePart): { body?: string
             )?.replace(/^<|>$/g, ''),
         })
     } else if (part.mimeType === 'text/html' && part.body?.data) {
-        body = decodeBase64Url(part.body.data)
-    } else if (part.mimeType === 'text/plain' && part.body?.data && !body) {
-        body = decodeBase64Url(part.body.data)
+        html = decodeBase64Url(part.body.data)
+    } else if (part.mimeType === 'text/plain' && part.body?.data) {
+        text = decodeBase64Url(part.body.data)
     }
 
     for (const child of part.parts ?? []) {
         const nested = extractBodyFromPart(child)
-        if (!body && nested.body) {
-            body = nested.body
-        }
+        if (!html && nested.html) html = nested.html
+        if (!text && nested.text) text = nested.text
         attachments.push(...nested.attachments)
     }
 
-    return { body, attachments }
+    return { html, text, attachments }
 }
 
 export function mapGmailMessageToEmailMessage(message: gmail_v1.Schema$Message): EmailMessage {
@@ -173,10 +173,11 @@ export function mapGmailMessageToEmailMessage(message: gmail_v1.Schema$Message):
     const sentAtHeader = getHeaderValue(headers, 'Date')
     const sentAt = sentAtHeader ? new Date(sentAtHeader).toISOString() : internalDate
 
-    const { body, attachments } = message.payload
+    const { html, text, attachments } = message.payload
         ? extractBodyFromPart(message.payload)
-        : { body: undefined, attachments: [] as EmailAttachment[] }
+        : { html: undefined, text: undefined, attachments: [] as EmailAttachment[] }
 
+    const body = html ?? text ?? ''
     return {
         id: message.id ?? '',
         threadId: message.threadId ?? '',
