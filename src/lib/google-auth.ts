@@ -2,7 +2,7 @@
 
 import { google } from 'googleapis'
 import { auth } from '@clerk/nextjs/server'
-import { getSubscriptionStatus } from './stripe-actions'
+import { getSubscriptionStatus } from './razorpay-actions'
 import { db } from '@/server/db'
 import { FREE_ACCOUNTS_PER_USER, PRO_ACCOUNTS_PER_USER } from '@/app/constants'
 import {

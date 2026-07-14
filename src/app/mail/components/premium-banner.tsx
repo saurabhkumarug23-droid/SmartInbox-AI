@@ -4,7 +4,7 @@ import React from 'react'
 import StripeButton from './stripe-button'
 import { api } from '@/trpc/react'
 import { FREE_CREDITS_PER_DAY } from '@/app/constants'
-import { getSubscriptionStatus } from '@/lib/stripe-actions'
+import { getSubscriptionStatus } from '@/lib/razorpay-actions'
 
 const PremiumBanner = () => {
     const [isSubscribed, setIsSubscribed] = React.useState(false)
