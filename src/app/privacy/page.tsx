@@ -108,7 +108,7 @@ const PrivacyPolicyPage = () => {
                     </h3>
                     <p className="text-justify leading-relaxed text-gray-600 mt-5 mb-10">
                         You have certain rights when it comes to the handling of your personal information. By emailing us at
-                        support@normal-human.com, you can:
+                        support@smartinbox.ai, you can:
                     </p>
                     <ul className="list-disc list-inside text-justify leading-relaxed text-gray-600 mt-5 mb-10">
                         <li>request access to the personal information that we have on you, or have it updated or corrected. Depending

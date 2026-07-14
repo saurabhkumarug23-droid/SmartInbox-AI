@@ -41,8 +41,8 @@ export function Mail({
   defaultCollapsed = false,
   navCollapsedSize,
 }: MailProps) {
-  const [tab] = useLocalStorage('normalhuman-tab', 'inbox')
-  const [done, setDone] = useLocalStorage('normalhuman-done', false)
+  const [tab] = useLocalStorage('smartinbox-tab', 'inbox')
+  const [done, setDone] = useLocalStorage('smartinbox-done', false)
   const [isCollapsed, setIsCollapsed] = React.useState(defaultCollapsed)
   const [isMounted, setIsMounted] = React.useState(false)
 

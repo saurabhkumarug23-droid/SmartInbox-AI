@@ -21,9 +21,9 @@ import { useThread } from "../../use-thread";
 
 export default function KBar({ children }: { children: React.ReactNode }) {
     const [isSearching, setIsSearching] = useAtom(isSearchingAtom)
-    const [_, setTab] = useLocalStorage(`normalhuman-tab`, 'inbox')
+    const [_, setTab] = useLocalStorage(`smartinbox-tab`, 'inbox')
     const [threadId, setThreadId] = useThread()
-    const [done, setDone] = useLocalStorage('normalhuman-done', false)
+    const [done, setDone] = useLocalStorage('smartinbox-done', false)
 
     const actions: Action[] = [
         {

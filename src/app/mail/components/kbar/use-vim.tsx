@@ -21,8 +21,8 @@ const useVim = () => {
     const queryClient = useQueryClient()
     const [threadId, setThreadId] = useThread()
     const [accountId] = useLocalStorage('accountId', '')
-    const [tab] = useLocalStorage('normalhuman-tab', 'inbox')
-    const [done] = useLocalStorage('normalhuman-done', false)
+    const [tab] = useLocalStorage('smartinbox-tab', 'inbox')
+    const [done] = useLocalStorage('smartinbox-done', false)
     const { threads: data, queryKey, refetch } = useThreads()
 
     const setUndone = api.mail.setUndone.useMutation({
